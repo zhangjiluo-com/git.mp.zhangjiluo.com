@@ -1,3 +1,6 @@
+<nav-bar title="仓库详情" />
+
+<page-container>
 <view class="container">
   <!-- 仓库基本信息 -->
   <view wx:if="{{repoInfo}}" class="repo-info">
@@ -5,19 +8,18 @@
     <text class="repo-desc">{{repoInfo.description || '暂无描述'}}</text>
     <view class="repo-meta">
       <view class="meta-item" wx:if="{{repoInfo.language}}">
-        <text class="meta-label">语言：</text>
         <text class="meta-value">{{repoInfo.language}}</text>
       </view>
       <view class="meta-item">
-        <text class="meta-label">星标：</text>
+        <text class="meta-label">Star:</text>
         <text class="meta-value">{{repoInfo.stargazers_count}}</text>
       </view>
       <view class="meta-item">
-        <text class="meta-label">分支：</text>
+        <text class="meta-label">Fork:</text>
         <text class="meta-value">{{repoInfo.forks_count}}</text>
       </view>
       <view class="meta-item">
-        <text class="meta-label">更新：</text>
+        <text class="meta-label">更新:</text>
         <text class="meta-value">{{repoInfo.updated_at}}</text>
       </view>
     </view>
@@ -50,7 +52,7 @@
       <text class="loading-text">加载中...</text>
     </view>
 
-    <view wx:elif="{{files.length === 0}}" class="empty">
+    <view wx:elif="{{files.length === 0 && dirs.length === 0}}" class="empty">
       <text class="empty-text">目录为空</text>
     </view>
 
@@ -80,4 +82,7 @@
       </view>
     </view>
   </view>
+<view class="" style="height: 200rpx;"></view>
+
 </view>
+</page-container>

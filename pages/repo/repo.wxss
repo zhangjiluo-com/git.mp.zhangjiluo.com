@@ -50,6 +50,7 @@
   font-size: 24rpx;
   color: #24292e;
   font-weight: 500;
+  margin-left: 0.6em;
 }
 
 .star-btn-container {

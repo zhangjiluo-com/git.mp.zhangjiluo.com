@@ -1,5 +1,4 @@
 .container {
-  background-color: #f5f5f5;
   min-height: 100%;
 }
 
@@ -9,7 +8,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 100rpx 40rpx;
+  width: 100%;
+  height: 100%;
 }
 
 .tip-text {
@@ -28,7 +28,7 @@
 
 /* 仓库列表 */
 .repo-list {
-  padding: 0 20rpx;
+  padding: 20rpx 20rpx 0;
 }
 
 .repo-item {
@@ -55,6 +55,7 @@
   font-weight: bold;
   color: #24292e;
   flex: 1;
+  word-break:break-all;
 }
 
 .repo-lang {
@@ -66,6 +67,7 @@
 }
 
 .repo-desc {
+  display: flex;
   font-size: 26rpx;
   color: #586069;
   line-height: 1.5;
@@ -80,6 +82,8 @@
 
 .stat-item {
   display: flex;
+  font-size: 26rpx;
+  line-height: 1;
   align-items: center;
   margin-right: 32rpx;
 }

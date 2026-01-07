@@ -1,6 +1,8 @@
 // home.js
 Page({
   data: {
+    isRefreshing: false,
+    a: 0,
     repos: [],
     isAuth: false,
     page: 1,
@@ -8,16 +10,17 @@ Page({
     hasMore: true
   },
 
-  onLoad: function() {
+  onLoad: function () {
     this.checkAuth()
   },
 
-  onShow: function() {
+  onShow: function () {
     // 每次显示页面时检查授权状态
     this.checkAuth()
   },
 
-  onPullDownRefresh: function() {
+  onPullDownRefresh: function () {
+    this.setData({ isRefreshing: true, a: 1 })
     // 下拉刷新
     this.setData({
       repos: [],
@@ -27,7 +30,7 @@ Page({
     this.loadRepos(true)
   },
 
-  onReachBottom: function() {
+  onReachBottom: function () {
     // 上滑加载更多
     if (this.data.hasMore) {
       this.loadRepos(false)
@@ -35,23 +38,23 @@ Page({
   },
 
   // 检查授权状态
-  checkAuth: function() {
+  checkAuth: function () {
     const app = getApp()
     const isAuth = app.checkAuth()
     this.setData({
       isAuth: isAuth
     })
-    
+
     if (isAuth) {
       this.loadRepos(true)
     }
   },
 
   // 加载仓库列表
-  loadRepos: function(refresh) {
+  loadRepos(refresh) {
     const app = getApp()
     const page = refresh ? 1 : this.data.page + 1
-    
+
     if (!refresh) {
       wx.showLoading({
         title: '加载中...',
@@ -61,7 +64,7 @@ Page({
     app.request(`/user/repos?page=${page}&per_page=${this.data.perPage}&sort=updated`)
       .then(res => {
         if (refresh) {
-          wx.stopPullDownRefresh()
+          this.setData({ isRefreshing:false})
         } else {
           wx.hideLoading()
         }
@@ -95,7 +98,7 @@ Page({
       })
       .catch(err => {
         if (refresh) {
-          wx.stopPullDownRefresh()
+          this.setData({ isRefreshing:false})
         } else {
           wx.hideLoading()
         }
@@ -107,12 +110,12 @@ Page({
   },
 
   // 格式化日期
-  formatDate: function(dateStr) {
+  formatDate: function (dateStr) {
     const date = new Date(dateStr)
     const now = new Date()
     const diff = now - date
     const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    
+
     if (days === 0) {
       return '今天'
     } else if (days === 1) {
@@ -125,7 +128,7 @@ Page({
   },
 
   // 跳转到仓库详情
-  goToRepo: function(e) {
+  goToRepo: function (e) {
     const repo = e.currentTarget.dataset.repo
     wx.navigateTo({
       url: `/pages/repo/repo?owner=${repo.owner}&repo=${repo.name}`
@@ -133,7 +136,7 @@ Page({
   },
 
   // 跳转到授权页面
-  goToAuth: function() {
+  goToAuth: function () {
     wx.navigateTo({
       url: '/pages/auth/auth'
     })

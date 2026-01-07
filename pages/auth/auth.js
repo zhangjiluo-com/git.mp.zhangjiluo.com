@@ -30,11 +30,12 @@ Page({
         wx.showToast({
           title: '登录成功',
           icon: 'success',
-          duration: 1500
+          duration: 1500,
+          mask: true,
         })
         // 跳转到首页
         setTimeout(() => {
-          wx.switchTab({
+          wx.redirectTo({
             url: '/pages/home/home'
           })
         }, 1500)

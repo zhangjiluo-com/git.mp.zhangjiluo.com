@@ -1,3 +1,5 @@
+<nav-bar title="文件详情" />
+
 <view class="container">
   <!-- 文件信息 -->
   <view class="file-info">

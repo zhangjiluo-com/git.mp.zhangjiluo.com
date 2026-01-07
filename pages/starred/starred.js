@@ -4,8 +4,9 @@ Page({
     repos: [],
     isAuth: false,
     isLoading: false,
+    isRefreshing: false,
     page: 1,
-    perPage: 20,
+    perPage: 10,
     hasMore: true
   },
 
@@ -19,6 +20,7 @@ Page({
   },
 
   onPullDownRefresh: function() {
+    this.setData({ isRefreshing: true })
     // 下拉刷新
     this.setData({
       repos: [],
@@ -53,19 +55,20 @@ Page({
     const app = getApp()
     const page = refresh ? 1 : this.data.page + 1
     
-    this.setData({
-      isLoading: true
-    })
+    if (!refresh) {
+      wx.showLoading({
+        title: '加载中...',
+      })
+    }
 
     app.request(`/user/starred?page=${page}&per_page=${this.data.perPage}&sort=updated`)
       .then(res => {
         if (refresh) {
+          this.setData({ isRefreshing: false })
           wx.stopPullDownRefresh()
+        } else {
+          wx.hideLoading()
         }
-
-        this.setData({
-          isLoading: false
-        })
 
         if (res.length === 0) {
           this.setData({
@@ -95,11 +98,11 @@ Page({
       })
       .catch(err => {
         if (refresh) {
+          this.setData({ isRefreshing: false })
           wx.stopPullDownRefresh()
+        } else {
+          wx.hideLoading()
         }
-        this.setData({
-          isLoading: false
-        })
         wx.showToast({
           title: '加载失败',
           icon: 'none'

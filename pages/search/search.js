@@ -4,8 +4,9 @@ Page({
     keyword: '',
     repos: [],
     isSearching: false,
+    isRefreshing: false,
     page: 1,
-    perPage: 20,
+    perPage: 10,
     hasMore: true
   },
 
@@ -30,6 +31,21 @@ Page({
     this.loadSearchResults(true)
   },
 
+  onPullDownRefresh: function() {
+    if (!this.data.keyword) {
+      wx.stopPullDownRefresh()
+      return
+    }
+    this.setData({ isRefreshing: true })
+    // 下拉刷新
+    this.setData({
+      repos: [],
+      page: 1,
+      hasMore: true
+    })
+    this.loadSearchResults(true)
+  },
+
   onReachBottom: function() {
     // 上滑加载更多
     if (this.data.hasMore && this.data.keyword) {
@@ -43,8 +59,20 @@ Page({
     const keyword = this.data.keyword
     const page = refresh ? 1 : this.data.page + 1
 
+    if (!refresh) {
+      wx.showLoading({
+        title: '加载中...',
+      })
+    }
+
     app.request(`/search/repositories?q=${keyword}&page=${page}&per_page=${this.data.perPage}`)
       .then(res => {
+        if (refresh) {
+          this.setData({ isRefreshing: false })
+          wx.stopPullDownRefresh()
+        } else {
+          wx.hideLoading()
+        }
         this.setData({
           isSearching: false
         })
@@ -79,6 +107,12 @@ Page({
         })
       })
       .catch(err => {
+        if (refresh) {
+          this.setData({ isRefreshing: false })
+          wx.stopPullDownRefresh()
+        } else {
+          wx.hideLoading()
+        }
         this.setData({
           isSearching: false
         })

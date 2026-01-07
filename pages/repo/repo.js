@@ -12,7 +12,7 @@ Page({
     ref: 'master' // 默认分支
   },
 
-  onLoad: function(options) {
+  onLoad: function (options) {
     this.setData({
       owner: options.owner,
       repo: options.repo
@@ -22,49 +22,55 @@ Page({
       title: options.repo
     })
     // 加载仓库信息和根目录文件
-    this.loadRepoInfo()
-    this.loadFiles('')
+    this.loadRepoInfo().then((res) => {
+      this.loadFiles('')
+    })
   },
 
   // 加载仓库基本信息
-  loadRepoInfo: function() {
+  loadRepoInfo() {
     const app = getApp()
     const { owner, repo } = this.data
 
-    Promise.all([
+    return Promise.all([
       // 获取仓库基本信息
       app.request(`/repos/${owner}/${repo}`),
       // 检查是否已收藏
       app.request(`/user/starred/${owner}/${repo}`, 'GET').then(() => true).catch(() => false)
     ])
       .then(([repoData, starred]) => {
+        const repoInfo = {
+          id: repoData.id,
+          full_name: repoData.full_name,
+          name: repoData.name,
+          description: repoData.description,
+          language: repoData.language,
+          stargazers_count: repoData.stargazers_count,
+          forks_count: repoData.forks_count,
+          updated_at: this.formatDate(repoData.updated_at),
+          starred: starred,
+          default_branch: repoData.default_branch,
+        }
         this.setData({
-          repoInfo: {
-            id: repoData.id,
-            full_name: repoData.full_name,
-            name: repoData.name,
-            description: repoData.description,
-            language: repoData.language,
-            stargazers_count: repoData.stargazers_count,
-            forks_count: repoData.forks_count,
-            updated_at: this.formatDate(repoData.updated_at),
-            starred: starred
-          }
+          repoInfo: repoInfo
         })
+        return repoInfo
       })
       .catch(err => {
         wx.showToast({
           title: '加载失败',
           icon: 'none'
         })
+        return Promise.reject(err)
       })
   },
 
   // 加载文件列表
-  loadFiles: function(path) {
+  loadFiles: function (path) {
     const app = getApp()
-    const { owner, repo, ref } = this.data
-    
+    const { owner, repo } = this.data
+    const ref = this.data.repoInfo.default_branch
+
     this.setData({
       isLoading: true,
       currentPath: path
@@ -73,7 +79,9 @@ Page({
     // 更新面包屑导航
     this.updateBreadcrumbs(path)
 
-    app.request(`/repos/${owner}/${repo}/contents/${path}?ref=${ref}`)
+    // 构建正确的API URL，避免空路径时出现多余斜杠
+    const url = path ? `/repos/${owner}/${repo}/contents/${path}?ref=${ref}` : `/repos/${owner}/${repo}/contents?ref=${ref}`
+    app.request(url)
       .then(res => {
         this.setData({
           isLoading: false
@@ -100,13 +108,13 @@ Page({
   },
 
   // 更新面包屑导航
-  updateBreadcrumbs: function(path) {
+  updateBreadcrumbs: function (path) {
     const breadcrumbs = [{ name: '根目录', path: '' }]
-    
+
     if (path) {
       const pathParts = path.split('/')
       let currentPath = ''
-      
+
       pathParts.forEach(part => {
         currentPath = currentPath ? `${currentPath}/${part}` : part
         breadcrumbs.push({
@@ -115,21 +123,21 @@ Page({
         })
       })
     }
-    
+
     this.setData({
       breadcrumbs: breadcrumbs
     })
   },
 
   // 跳转到子目录
-  goToDir: function(e) {
+  goToDir: function (e) {
     const file = e.currentTarget.dataset.file
     const newPath = this.data.currentPath ? `${this.data.currentPath}/${file.name}` : file.name
     this.loadFiles(newPath)
   },
 
   // 跳转到文件详情
-  goToFile: function(e) {
+  goToFile: function (e) {
     const file = e.currentTarget.dataset.file
     wx.navigateTo({
       url: `/pages/file/file?owner=${this.data.owner}&repo=${this.data.repo}&path=${file.path}&name=${file.name}&sha=${file.sha}`
@@ -137,13 +145,13 @@ Page({
   },
 
   // 跳转到指定路径
-  goToPath: function(e) {
+  goToPath: function (e) {
     const path = e.currentTarget.dataset.path
     this.loadFiles(path)
   },
 
   // 切换收藏状态
-  toggleStar: function() {
+  toggleStar: function () {
     const app = getApp()
     const { owner, repo, repoInfo } = this.data
     const isStarred = repoInfo.starred
@@ -176,12 +184,12 @@ Page({
   },
 
   // 格式化日期
-  formatDate: function(dateStr) {
+  formatDate: function (dateStr) {
     const date = new Date(dateStr)
     const now = new Date()
     const diff = now - date
     const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    
+
     if (days === 0) {
       return '今天'
     } else if (days === 1) {

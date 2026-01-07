@@ -11,7 +11,12 @@
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#24292e",
     "navigationBarTitleText": "Git 仓库浏览",
-    "navigationBarTextStyle": "white"
+    "navigationBarTextStyle": "white",
+    "navigationStyle": "custom"
+  },
+  "usingComponents": {
+    "nav-bar": "./components/nav-bar/index",
+    "page-container": "./components/page-container/index"
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json"
